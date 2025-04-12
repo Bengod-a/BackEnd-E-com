@@ -11,22 +11,6 @@ const (
 	AdminRole Role = "admin"
 )
 
-// type User struct {
-// 	gorm.Model
-// 	Name        string  `gorm:"not null" json:"name"`
-// 	Lastname    *string `json:"lastname"`
-// 	Email       string  `gorm:"unique;not null" json:"email"`
-// 	Password    string  `gorm:"not null" json:"-"`
-// 	Role        Role    `gorm:"type:varchar(10);default:'user'" json:"role"`
-// 	Phonenumber *string `json:"phonenumber"`
-
-// 	Products  []Product  `gorm:"constraint:OnDelete:CASCADE;" json:"products"`
-// 	Orders    []Order    `gorm:"foreignKey:OrderByID;constraint:OnDelete:CASCADE;" json:"orders"`
-// 	Addresses []Address  `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE;" json:"addresses"`
-// 	Carts     []Cart     `gorm:"foreignKey:OrderByID;constraint:OnDelete:CASCADE;" json:"carts"`
-// 	Favorites []Favorite `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE;" json:"favorites"`
-// }
-
 type User struct {
 	gorm.Model
 	Name        string  `gorm:"not null" json:"name"`
