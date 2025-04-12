@@ -14,22 +14,26 @@ func main() {
 
 	app.Use(cors.New(cors.Config{
 		AllowOrigins:     "http://localhost:3000",
-		AllowMethods:     "GET,POST,PUT,DELETE",
+		AllowMethods:     "GET,POST,PUT,DELETE, PATCH",
 		AllowHeaders:     "Content-Type, Authorization",
 		AllowCredentials: true,
 	}))
 
 	// DropAllTables()
 
+	// Admin
 	app.Post("/products", middleware.AdminCheck, controllers.AddProduct)
 	app.Get("/products", middleware.AdminCheck, controllers.GetProduct)
 	app.Get("/products/:id", middleware.AdminCheck, controllers.GetProductsid)
+	app.Patch("/products/:id", controllers.ChangProduct)
 	app.Delete("/products/:id", middleware.AdminCheck, controllers.DeleteProduct)
 	app.Post("/category", middleware.AdminCheck, controllers.Addcategory)
 	app.Post("/uploadimage", middleware.AdminCheck, controllers.UploadImages)
 	app.Post("/removeimage", middleware.AdminCheck, controllers.HandleRemoveImage)
+	app.Post("/removeimageinproduct/:id", middleware.AdminCheck, controllers.RemoveImageInProduct)
 	app.Get("/category", middleware.AdminCheck, controllers.Getcategory)
 	app.Get("/user", middleware.AdminCheck, controllers.Getuser)
+	// Admin
 
 	app.Post("/register", controllers.Register)
 	app.Post("/login", controllers.Login)

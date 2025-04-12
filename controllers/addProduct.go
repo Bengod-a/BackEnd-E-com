@@ -41,8 +41,6 @@ func AddProduct(c *fiber.Ctx) error {
 		})
 	}
 
-	fmt.Println(form)
-
 	priceFloat, err := strconv.ParseFloat(req.Price, 64)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -64,20 +62,20 @@ func AddProduct(c *fiber.Ctx) error {
 		})
 	}
 
-	var images []models.Images
-	for _, imageURL := range form.Value["images"] {
-		image := models.Images{
-			URL: imageURL,
-		}
-		images = append(images, image)
-	}
-
 	qty, err := strconv.Atoi(req.Quantity)
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
 			"success": false,
 			"message": "quantity format",
 		})
+	}
+
+	var images []models.Images
+	for _, imageURL := range form.Value["images"] {
+		image := models.Images{
+			URL: imageURL,
+		}
+		images = append(images, image)
 	}
 
 	product := models.Product{
@@ -91,7 +89,7 @@ func AddProduct(c *fiber.Ctx) error {
 	db.DB.Create(&product)
 
 	return c.JSON(fiber.Map{
-		"message": "Product added successfully",
+		"message": "เพิ่มสินค้าสำเร็จ",
 		"data":    product,
 	})
 }
