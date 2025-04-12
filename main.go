@@ -28,10 +28,12 @@ func main() {
 	app.Patch("/products/:id", controllers.ChangProduct)
 	app.Delete("/products/:id", middleware.AdminCheck, controllers.DeleteProduct)
 	app.Post("/category", middleware.AdminCheck, controllers.Addcategory)
+	app.Get("/category", middleware.AdminCheck, controllers.Getcategory)
+	app.Get("/category/:id", middleware.AdminCheck, controllers.GetcategoryId)
+	app.Patch("/category/:id", middleware.AdminCheck, controllers.Editcategory)
 	app.Post("/uploadimage", middleware.AdminCheck, controllers.UploadImages)
 	app.Post("/removeimage", middleware.AdminCheck, controllers.HandleRemoveImage)
 	app.Post("/removeimageinproduct/:id", middleware.AdminCheck, controllers.RemoveImageInProduct)
-	app.Get("/category", middleware.AdminCheck, controllers.Getcategory)
 	app.Get("/user", middleware.AdminCheck, controllers.Getuser)
 	// Admin
 

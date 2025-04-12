@@ -28,9 +28,8 @@ type User struct {
 
 type Product struct {
 	gorm.Model
-	Name  string  `gorm:"not null" json:"name"`
-	Price float64 `gorm:"not null" json:"price"`
-	// Categories      []Category       `gorm:"many2many:product_categories;" json:"categories"`
+	Name            string           `gorm:"not null" json:"name"`
+	Price           float64          `gorm:"not null" json:"price"`
 	Categories      []Category       `gorm:"many2many:product_categories;constraint:OnDelete:CASCADE;" json:"categories"`
 	Images          []Images         `gorm:"many2many:product_images;constraint:OnDelete:CASCADE;" json:"images"`
 	Sold            int              `json:"sold"`
