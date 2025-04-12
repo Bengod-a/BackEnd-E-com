@@ -19,9 +19,12 @@ func main() {
 		AllowCredentials: true,
 	}))
 
+	// DropAllTables()
+
 	app.Post("/products", middleware.AdminCheck, controllers.AddProduct)
 	app.Get("/products", middleware.AdminCheck, controllers.GetProduct)
 	app.Get("/products/:id", middleware.AdminCheck, controllers.GetProductsid)
+	app.Delete("/products/:id", middleware.AdminCheck, controllers.DeleteProduct)
 	app.Post("/category", middleware.AdminCheck, controllers.Addcategory)
 	app.Post("/uploadimage", middleware.AdminCheck, controllers.UploadImages)
 	app.Post("/removeimage", middleware.AdminCheck, controllers.HandleRemoveImage)
@@ -34,4 +37,14 @@ func main() {
 	if err := app.Listen(":8080"); err != nil {
 		panic("Failed to start server: " + err.Error())
 	}
+}
+
+func DropAllTables() {
+	db.DB.Exec(`DO $$ DECLARE
+		r RECORD;
+	BEGIN
+		FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'public') LOOP
+			EXECUTE 'DROP TABLE IF EXISTS ' || quote_ident(r.tablename) || ' CASCADE';
+		END LOOP;
+	END $$;`)
 }

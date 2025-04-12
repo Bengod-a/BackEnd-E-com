@@ -56,7 +56,7 @@ func HandleRemoveImage(c *fiber.Ctx) error {
 	})
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": fmt.Sprintf("ลบรูปไม่สำเร็จ %s", err),
+			"error": "ลบรูปไม่สำเร็จ",
 		})
 	}
 

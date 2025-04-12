@@ -28,9 +28,10 @@ type User struct {
 
 type Product struct {
 	gorm.Model
-	Name            string           `gorm:"not null" json:"name"`
-	Price           float64          `gorm:"not null" json:"price"`
-	Categories      []Category       `gorm:"many2many:product_categories;" json:"categories"`
+	Name  string  `gorm:"not null" json:"name"`
+	Price float64 `gorm:"not null" json:"price"`
+	// Categories      []Category       `gorm:"many2many:product_categories;" json:"categories"`
+	Categories      []Category       `gorm:"many2many:product_categories;constraint:OnDelete:CASCADE;" json:"categories"`
 	Images          []Images         `gorm:"many2many:product_images;constraint:OnDelete:CASCADE;" json:"images"`
 	Sold            int              `json:"sold"`
 	Quantity        int              `json:"quantity"`
@@ -42,14 +43,14 @@ type Product struct {
 type Images struct {
 	gorm.Model
 	URL     string    `gorm:"not null" json:"url"`
-	Product []Product `gorm:"many2many:product_images" json:"products"`
+	Product []Product `gorm:"many2many:product_images;constraint:OnDelete:CASCADE;" json:"products"`
 }
 
 type Category struct {
 	gorm.Model
 	Name     string    `gorm:"not null" json:"name"`
 	Icon     string    `gorm:"not null" json:"icon"`
-	Products []Product `gorm:"many2many:product_categories;" json:"products"`
+	Products []Product `gorm:"many2many:product_categories;constraint:OnDelete:CASCADE;" json:"products"`
 }
 
 type Order struct {
