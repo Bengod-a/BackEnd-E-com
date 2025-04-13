@@ -39,6 +39,7 @@ func main() {
 
 	app.Post("/register", controllers.Register)
 	app.Post("/login", controllers.Login)
+	app.Patch("/edituser", middleware.UserCheck, controllers.Edituser)
 
 	if err := app.Listen(":8080"); err != nil {
 		panic("Failed to start server: " + err.Error())

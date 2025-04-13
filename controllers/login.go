@@ -74,7 +74,7 @@ func Login(c *fiber.Ctx) error {
 		"token":   token,
 		"user": fiber.Map{
 			"id":          user.ID,
-			"name":        user.Name,
+			"username":    user.Name,
 			"email":       user.Email,
 			"role":        user.Role,
 			"lastname":    user.Lastname,

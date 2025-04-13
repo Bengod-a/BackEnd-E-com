@@ -11,6 +11,7 @@ import (
 
 type Req struct {
 	Username    string `json:"username"`
+	Id          int    `json:"id"`
 	Lastname    string `json:"lastname"`
 	Email       string `json:"email"`
 	Password    string `json:"password"`
@@ -83,6 +84,52 @@ func Register(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"success": true,
 		"message": "สมัครสมาชิกสำเร็จ",
+		"data":    user,
+	})
+}
+
+func Edituser(c *fiber.Ctx) error {
+	var req Req
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "ไม่สามารถอ่านข้อมูลได้",
+		})
+	}
+
+	if strings.TrimSpace(req.Username) == "" ||
+		strings.TrimSpace(req.Lastname) == "" ||
+		strings.TrimSpace(req.Email) == "" ||
+		strings.TrimSpace(req.Phonenumber) == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "กรุณากรอกข้อมูลให้ครบ",
+		})
+	}
+
+	var user models.User
+	err := db.DB.Where("id = ?", req.Id).First(&user).Error
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "ไม่มี ID นี้",
+		})
+	}
+
+	user.Name = req.Username
+	user.Lastname = &req.Lastname
+	user.Email = req.Email
+	user.Phonenumber = &req.Phonenumber
+
+	if err := db.DB.Save(&user).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "เกิดข้อผิดพลาดในการบันทึกข้อมูล",
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"message": "อัปเดตข้อมูลส่วนตัวสำเร็จ",
 		"data":    user,
 	})
 }

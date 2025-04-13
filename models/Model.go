@@ -1,6 +1,7 @@
 package models
 
 import (
+	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
@@ -34,6 +35,7 @@ type Product struct {
 	Images          []Images         `gorm:"many2many:product_images;constraint:OnDelete:CASCADE;" json:"images"`
 	Sold            int              `json:"sold"`
 	Quantity        int              `json:"quantity"`
+	Specs           datatypes.JSON   `json:"specs"`
 	Favorites       []Favorite       `gorm:"foreignKey:ProductID;constraint:OnDelete:CASCADE;" json:"favorites"`
 	ProductsOnCart  []ProductOnCart  `gorm:"foreignKey:ProductID;constraint:OnDelete:CASCADE;" json:"products_on_cart"`
 	ProductsOnOrder []ProductOnOrder `gorm:"foreignKey:ProductID;constraint:OnDelete:CASCADE;" json:"products_on_order"`

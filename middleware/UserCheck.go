@@ -8,20 +8,33 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
-func AdminCheck(c *fiber.Ctx) error {
-	tokenString := c.Get("Authorization")
-	if len(tokenString) > 7 && tokenString[:7] == "Bearer " {
-		tokenString = tokenString[7:]
+type Req struct {
+	Id int `json:"id"`
+}
+
+func UserCheck(c *fiber.Ctx) error {
+	var req Req
+
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "ไม่สามารถอ่านข้อมูลได้",
+		})
 	}
 
-	if tokenString == "" {
+	token := c.Get("Authorization")
+	if len(token) > 7 && token[:7] == "Bearer " {
+		token = token[7:]
+	}
+
+	if token == "" {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
 			"message": "Token not provided",
 		})
 	}
 
-	parsedToken, err := services.JWTAuthService().ValidateToken(tokenString)
+	parsedToken, err := services.JWTAuthService().ValidateToken(token)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
@@ -52,8 +65,15 @@ func AdminCheck(c *fiber.Ctx) error {
 		})
 	}
 
-	role := claims["role"].(string)
-	if role != "admin" {
+	idFloat, ok := claims["id"].(float64)
+	if !ok {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"success": false,
+			"message": "Invalid token claims",
+		})
+	}
+	id := int(idFloat)
+	if id != req.Id {
 		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
 			"success": false,
 			"message": "อย่าๆ",
