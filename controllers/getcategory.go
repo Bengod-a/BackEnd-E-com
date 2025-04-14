@@ -6,9 +6,26 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+func Getcategory1(c *fiber.Ctx) error {
+
+	var category []models.Category1
+
+	err := db.DB.Preload("Products").Find(&category).Error
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "Error in Getcategory",
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"success": true,
+		"data":    category,
+	})
+}
+
 func Getcategory(c *fiber.Ctx) error {
 
-	var category []models.Category
+	var category []models.Category2
 
 	err := db.DB.Preload("Products").Find(&category).Error
 	if err != nil {
@@ -26,7 +43,7 @@ func Getcategory(c *fiber.Ctx) error {
 func GetcategoryId(c *fiber.Ctx) error {
 	id := c.Params("id")
 
-	var category models.Category
+	var category models.Category2
 	err := db.DB.Preload("Products.Images").First(&category, "id = ?", id).Error
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -49,7 +66,7 @@ func Editcategory(c *fiber.Ctx) error {
 			"message": "Error in BodyParser",
 		})
 	}
-	var category models.Category
+	var category models.Category2
 	if err := db.DB.Where("id = ?", id).First(&category).Error; err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"message": "Error in Editcategory",

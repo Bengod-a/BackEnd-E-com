@@ -31,7 +31,8 @@ type Product struct {
 	gorm.Model
 	Name            string           `gorm:"not null" json:"name"`
 	Price           float64          `gorm:"not null" json:"price"`
-	Categories      []Category       `gorm:"many2many:product_categories;constraint:OnDelete:CASCADE;" json:"categories"`
+	Categories1     []Category1      `gorm:"many2many:product_categories1;constraint:OnDelete:CASCADE;" json:"categories1"`
+	Categories2     []Category2      `gorm:"many2many:product_categories2;constraint:OnDelete:CASCADE;" json:"categories2"`
 	Images          []Images         `gorm:"many2many:product_images;constraint:OnDelete:CASCADE;" json:"images"`
 	Sold            int              `json:"sold"`
 	Quantity        int              `json:"quantity"`
@@ -47,11 +48,18 @@ type Images struct {
 	Product []Product `gorm:"many2many:product_images;constraint:OnDelete:CASCADE;" json:"products"`
 }
 
-type Category struct {
+type Category1 struct {
 	gorm.Model
 	Name     string    `gorm:"not null" json:"name"`
 	Icon     string    `gorm:"not null" json:"icon"`
-	Products []Product `gorm:"many2many:product_categories;constraint:OnDelete:CASCADE;" json:"products"`
+	Products []Product `gorm:"many2many:product_categories1;constraint:OnDelete:CASCADE;" json:"products"`
+}
+
+type Category2 struct {
+	gorm.Model
+	Name     string    `gorm:"not null" json:"name"`
+	Icon     string    `gorm:"not null" json:"icon"`
+	Products []Product `gorm:"many2many:product_categories2;constraint:OnDelete:CASCADE;" json:"products"`
 }
 
 type Order struct {
@@ -69,16 +77,15 @@ type Order struct {
 
 type Address struct {
 	gorm.Model
-	Name        string  `gorm:"not null" json:"name"`
-	Phonenumber int     `gorm:"not null" json:"phonenumber"`
-	Address     string  `gorm:"not null" json:"address"`
-	Province    string  `gorm:"not null" json:"province"`
-	Amphure     string  `gorm:"not null" json:"amphure"`
-	Tambon      string  `gorm:"not null" json:"tambon"`
-	Zipcode     int     `gorm:"not null" json:"zipcode"`
-	UserID      uint    `gorm:"not null" json:"user_id"`
-	User        User    `gorm:"foreignKey:UserID" json:"user"`
-	Orders      []Order `gorm:"foreignKey:AddressID;constraint:OnDelete:CASCADE;" json:"orders"`
+	Name     string  `gorm:"not null" json:"name"`
+	Address  string  `gorm:"not null" json:"address"`
+	Province string  `gorm:"not null" json:"province"`
+	Amphure  string  `gorm:"not null" json:"amphure"`
+	Tambon   string  `gorm:"not null" json:"tambon"`
+	Zipcode  int     `gorm:"not null" json:"zipcode"`
+	UserID   uint    `gorm:"not null" json:"user_id"`
+	User     User    `gorm:"foreignKey:UserID" json:"user"`
+	Orders   []Order `gorm:"foreignKey:AddressID;constraint:OnDelete:CASCADE;" json:"orders"`
 }
 
 type Cart struct {

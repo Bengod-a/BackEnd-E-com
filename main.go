@@ -27,18 +27,27 @@ func main() {
 	app.Get("/products/:id", middleware.AdminCheck, controllers.GetProductsid)
 	app.Patch("/products/:id", controllers.ChangProduct)
 	app.Delete("/products/:id", middleware.AdminCheck, controllers.DeleteProduct)
+	// category
+	// หมวดหมู่หลัก
+	app.Post("/category1", middleware.AdminCheck, controllers.Addcategory1)
+	app.Get("/category1", middleware.AdminCheck, controllers.Getcategory1)
+	// หมวดหมู่รอง
 	app.Post("/category", middleware.AdminCheck, controllers.Addcategory)
 	app.Get("/category", middleware.AdminCheck, controllers.Getcategory)
+
 	app.Get("/category/:id", middleware.AdminCheck, controllers.GetcategoryId)
 	app.Patch("/category/:id", middleware.AdminCheck, controllers.Editcategory)
+	// Image
 	app.Post("/uploadimage", middleware.AdminCheck, controllers.UploadImages)
 	app.Post("/removeimage", middleware.AdminCheck, controllers.HandleRemoveImage)
 	app.Post("/removeimageinproduct/:id", middleware.AdminCheck, controllers.RemoveImageInProduct)
+	// GetUser
 	app.Get("/user", middleware.AdminCheck, controllers.Getuser)
 	// Admin
 
 	app.Post("/register", controllers.Register)
 	app.Post("/login", controllers.Login)
+	app.Post("/address", middleware.UserCheck, controllers.CreateAddress)
 	app.Patch("/edituser", middleware.UserCheck, controllers.Edituser)
 
 	if err := app.Listen(":8080"); err != nil {

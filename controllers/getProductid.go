@@ -11,7 +11,7 @@ func GetProductsid(c *fiber.Ctx) error {
 
 	var product []models.Product
 
-	if err := db.DB.Preload("Categories").Preload("Images").First(&product, "id = ?", id).Error; err != nil {
+	if err := db.DB.Preload("Categories1").Preload("Categories2").Preload("Images").First(&product, "id = ?", id).Error; err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"error": "Error in GetProductsid",
 		})

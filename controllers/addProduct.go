@@ -125,14 +125,15 @@ import (
 )
 
 type ReqProduct struct {
-	Name       string   `form:"name"`
-	Price      string   `form:"price"`
-	CategoryID string   `form:"categoryId"`
-	Quantity   string   `form:"quantity"`
-	UserID     string   `form:"userId"`
-	Images     []string `json:"images"`
-	Key        string   `json:"key"`
-	Value      string   `json:"value"`
+	Name        string   `form:"name"`
+	Price       string   `form:"price"`
+	CategoryID1 string   `form:"categoryId1"`
+	CategoryID2 string   `form:"categoryId2"`
+	Quantity    string   `form:"quantity"`
+	UserID      string   `form:"userId"`
+	Images      []string `json:"images"`
+	Key         string   `json:"key"`
+	Value       string   `json:"value"`
 }
 
 func AddProduct(c *fiber.Ctx) error {
@@ -147,11 +148,12 @@ func AddProduct(c *fiber.Ctx) error {
 
 	req.Name = getFirstValue(form.Value["name"])
 	req.Price = getFirstValue(form.Value["price"])
-	req.CategoryID = getFirstValue(form.Value["categoryId"])
+	req.CategoryID1 = getFirstValue(form.Value["categoryId1"])
+	req.CategoryID2 = getFirstValue(form.Value["categoryId2"])
 	req.UserID = getFirstValue(form.Value["userId"])
 	req.Quantity = getFirstValue(form.Value["quantity"])
 
-	if req.Name == "" || req.Price == "" || req.CategoryID == "" || req.UserID == "" || req.Quantity == "" {
+	if req.Name == "" || req.Price == "" || req.CategoryID1 == "" || req.CategoryID2 == "" || req.UserID == "" || req.Quantity == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"message": "กรุณากรอกข้อมูลให้ครบ",
 		})
@@ -164,15 +166,29 @@ func AddProduct(c *fiber.Ctx) error {
 		})
 	}
 
-	categoryID, err := strconv.ParseUint(req.CategoryID, 10, 32)
+	categoryID1, err := strconv.ParseUint(req.CategoryID1, 10, 32)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"message": "ID หมวดหมู่ต้องเป็นตัวเลข",
 		})
 	}
 
-	var category models.Category
-	if err := db.DB.First(&category, categoryID).Error; err != nil {
+	categoryID2, err := strconv.ParseUint(req.CategoryID2, 10, 32)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "ID หมวดหมู่ต้องเป็นตัวเลข",
+		})
+	}
+
+	var category1 models.Category1
+	if err := db.DB.First(&category1, categoryID1).Error; err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"message": "ไม่พบหมวดหมู่ที่เลือก",
+		})
+	}
+
+	var category2 models.Category2
+	if err := db.DB.First(&category2, categoryID2).Error; err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"message": "ไม่พบหมวดหมู่ที่เลือก",
 		})
@@ -210,12 +226,13 @@ func AddProduct(c *fiber.Ctx) error {
 	}
 
 	product := models.Product{
-		Name:       req.Name,
-		Price:      priceFloat,
-		Quantity:   qty,
-		Categories: []models.Category{category},
-		Images:     images,
-		Specs:      datatypes.JSON(specsJSON),
+		Name:        req.Name,
+		Price:       priceFloat,
+		Quantity:    qty,
+		Categories1: []models.Category1{category1},
+		Categories2: []models.Category2{category2},
+		Images:      images,
+		Specs:       datatypes.JSON(specsJSON),
 	}
 
 	db.DB.Create(&product)

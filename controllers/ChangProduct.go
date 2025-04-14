@@ -30,15 +30,17 @@ func ChangProduct(c *fiber.Ctx) error {
 
 	req.Name = form.Value["name"][0]
 	req.Price = form.Value["price"][0]
-	req.CategoryID = form.Value["categoryId"][0]
+	req.CategoryID1 = form.Value["categoryId1"][0]
+	req.CategoryID2 = form.Value["categoryId2"][0]
 	req.Quantity = form.Value["quantity"][0]
 
 	priceFloat, _ := strconv.ParseFloat(req.Price, 64)
-	categoryID, _ := strconv.ParseUint(req.CategoryID, 10, 32)
+	categoryID1, _ := strconv.ParseUint(req.CategoryID1, 10, 32)
+	categoryID2, _ := strconv.ParseUint(req.CategoryID2, 10, 32)
 	qty, _ := strconv.Atoi(req.Quantity)
 
 	var product models.Product
-	if err := db.DB.Preload("Images").Preload("Categories").First(&product, productID).Error; err != nil {
+	if err := db.DB.Preload("Images").Preload("Categories1").Preload("Categories2").First(&product, productID).Error; err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"message": "ไม่พบสินค้า",
 		})
@@ -51,8 +53,14 @@ func ChangProduct(c *fiber.Ctx) error {
 		images = append(images, models.Images{URL: url})
 	}
 
-	var category models.Category
-	if err := db.DB.First(&category, categoryID).Error; err != nil {
+	var category1 models.Category1
+	if err := db.DB.First(&category1, categoryID1).Error; err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"message": "ไม่พบหมวดหมู่",
+		})
+	}
+	var category2 models.Category2
+	if err := db.DB.First(&category2, categoryID2).Error; err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"message": "ไม่พบหมวดหมู่",
 		})
@@ -62,7 +70,8 @@ func ChangProduct(c *fiber.Ctx) error {
 	product.Price = priceFloat
 	product.Quantity = qty
 	product.Images = images
-	product.Categories = []models.Category{category}
+	product.Categories1 = []models.Category1{category1}
+	product.Categories2 = []models.Category2{category2}
 
 	db.DB.Save(&product)
 

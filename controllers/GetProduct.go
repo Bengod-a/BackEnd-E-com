@@ -18,7 +18,7 @@ func GetProduct(c *fiber.Ctx) error {
 
 	db.DB.Model(&models.Product{}).Count(&total)
 
-	err := db.DB.Preload("Categories").Preload("Images").Limit(pageSize).Offset(offset).Find(&products).Error
+	err := db.DB.Preload("Categories2").Preload("Categories1").Preload("Images").Limit(pageSize).Offset(offset).Find(&products).Error
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"message": "Error in GetProduct",
