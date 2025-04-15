@@ -30,6 +30,7 @@ type User struct {
 type Product struct {
 	gorm.Model
 	Name            string           `gorm:"not null" json:"name"`
+	Description     string           `gorm:"not null" json:"description"`
 	Price           float64          `gorm:"not null" json:"price"`
 	Categories1     []Category1      `gorm:"many2many:product_categories1;constraint:OnDelete:CASCADE;" json:"categories1"`
 	Categories2     []Category2      `gorm:"many2many:product_categories2;constraint:OnDelete:CASCADE;" json:"categories2"`
@@ -77,7 +78,6 @@ type Order struct {
 
 type Address struct {
 	gorm.Model
-	Name     string  `gorm:"not null" json:"name"`
 	Address  string  `gorm:"not null" json:"address"`
 	Province string  `gorm:"not null" json:"province"`
 	Amphure  string  `gorm:"not null" json:"amphure"`

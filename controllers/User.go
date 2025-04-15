@@ -14,7 +14,7 @@ type ReqCreateAddress struct {
 	Province string `json:"province"`
 	Amphure  string `json:"amphure"`
 	Tambon   string `json:"tambon"`
-	Zipcode  *int   `json:"zipcode"`
+	Zipcode  int    `json:"zipcode"`
 }
 
 func CreateAddress(c *fiber.Ctx) error {
@@ -50,7 +50,7 @@ func CreateAddress(c *fiber.Ctx) error {
 		Province: req.Province,
 		Amphure:  req.Amphure,
 		Tambon:   req.Tambon,
-		Zipcode:  *req.Zipcode,
+		Zipcode:  req.Zipcode,
 		UserID:   uint(req.Id),
 	}
 
@@ -64,6 +64,32 @@ func CreateAddress(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"success": true,
 		"message": "เพิ่มที่อยู่สำเร็จ",
+		"data":    address,
+	})
+
+}
+
+func DeleteAddress(c *fiber.Ctx) error {
+	id := c.Params("id")
+
+	var address models.Address
+	if err := db.DB.Where("id = ?", id).First(&address).Error; err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"success": false,
+			"message": "ไม่พบที่อยู่",
+		})
+	}
+
+	if err := db.DB.Unscoped().Delete(&address).Error; err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"success": false,
+			"message": "Delete Address Error",
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"success": true,
+		"message": "ลบที่อยู่สำเร็จ",
 		"data":    address,
 	})
 

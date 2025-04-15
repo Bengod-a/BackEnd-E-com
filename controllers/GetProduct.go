@@ -30,3 +30,37 @@ func GetProduct(c *fiber.Ctx) error {
 	})
 
 }
+
+func GetBesSaleProduct(c *fiber.Ctx) error {
+	var products []models.Product
+
+	if err := db.DB.Preload("Categories1").Preload("Categories2").Preload("Images").Order("sold DESC").Limit(10).Find(&products).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "Error in GetBesSaleProduct",
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"success": true,
+		"message": "ดึงสินค้าขายดีสำเร็จ",
+		"data":    products,
+	})
+}
+
+func GetProductById(c *fiber.Ctx) error {
+	id := c.Params("id")
+	var products []models.Product
+
+	err := db.DB.Preload("Categories2").Preload("Categories1").Preload("Images").Where("id = ?", &id).Find(&products).Error
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "Error in GetProductById",
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"data": products,
+	})
+
+}

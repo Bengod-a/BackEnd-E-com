@@ -29,6 +29,7 @@ func ChangProduct(c *fiber.Ctx) error {
 	}
 
 	req.Name = form.Value["name"][0]
+	req.Description = form.Value["description"][0]
 	req.Price = form.Value["price"][0]
 	req.CategoryID1 = form.Value["categoryId1"][0]
 	req.CategoryID2 = form.Value["categoryId2"][0]
@@ -67,6 +68,7 @@ func ChangProduct(c *fiber.Ctx) error {
 	}
 
 	product.Name = req.Name
+	product.Description = req.Description
 	product.Price = priceFloat
 	product.Quantity = qty
 	product.Images = images

@@ -41,6 +41,13 @@ func Register(c *fiber.Ctx) error {
 		})
 	}
 
+	if len(req.Phonenumber) > 10 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "เบอร์ต้องมี่แค่ 10 ตัว",
+		})
+	}
+
 	if req.Password != req.Conpassword {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -104,6 +111,13 @@ func Edituser(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
 			"message": "กรุณากรอกข้อมูลให้ครบ",
+		})
+	}
+
+	if len(req.Phonenumber) > 10 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "เบอร์ต้องมี่แค่ 10 ตัว",
 		})
 	}
 
