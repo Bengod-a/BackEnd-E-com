@@ -94,3 +94,87 @@ func DeleteAddress(c *fiber.Ctx) error {
 	})
 
 }
+
+type ReqAddToCart struct {
+	Productid int `json:"Productid"`
+	Price     int `json:"price"`
+	Quantity  int `json:"quantity"`
+	Id        int `json:"id"`
+}
+
+func AddToCart(c *fiber.Ctx) error {
+	var req ReqAddToCart
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "ไม่สามารถอ่านข้อมูลได้",
+		})
+	}
+
+	if int(req.Productid) == 0 || int(req.Quantity) == 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "ข้อมูลไม่ครบ",
+		})
+	}
+
+	var cart models.Cart
+
+	err := db.DB.Where("order_by_id = ?", req.Id).First(&cart).Error
+	if err != nil {
+		cart = models.Cart{
+			CartTotal: float64(req.Price * req.Quantity),
+			OrderByID: uint(req.Id),
+		}
+
+		if err := db.DB.Create(&cart).Error; err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"success": false,
+				"message": "ไม่สามารถสร้างตะกร้าได้",
+			})
+		}
+
+	} else {
+		cart.CartTotal += float64(req.Price * req.Quantity)
+		if err := db.DB.Save(&cart).Error; err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"success": false,
+				"message": "ไม่สามารถอัปเดตตะกร้าได้",
+			})
+		}
+	}
+
+	var productOnCart models.ProductOnCart
+
+	err = db.DB.Where("product_id = ? AND cart_id = ?", req.Productid, cart.ID).First(&productOnCart).Error
+	if err != nil {
+		productOnCart = models.ProductOnCart{
+			CartID:    cart.ID,
+			ProductID: uint(req.Productid),
+			Count:     req.Quantity,
+			Price:     float64(req.Price),
+		}
+		if err := db.DB.Create(&productOnCart).Error; err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"success": false,
+				"message": "เพิ่มสินค้าในตะกร้าไม่สำเร็จ",
+			})
+		}
+	} else {
+		productOnCart.Count += req.Quantity
+		productOnCart.Price = float64(req.Price)
+		if err := db.DB.Save(&productOnCart).Error; err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"success": false,
+				"message": "อัปเดตสินค้าในตะกร้าไม่สำเร็จ",
+			})
+		}
+	}
+
+	return c.JSON(fiber.Map{
+		"success": true,
+		"message": "เพิ่มสินค้าในตะกร้าสำเร็จ",
+		"cart":    cart,
+		"product": productOnCart,
+	})
+}

@@ -34,7 +34,7 @@ func Login(c *fiber.Ctx) error {
 	}
 
 	var user models.User
-	if err := db.DB.Preload("Addresses").Where("email = ?", req.Email).First(&user).Error; err != nil {
+	if err := db.DB.Preload("Addresses").Preload("Carts.Products").Where("email = ?", req.Email).First(&user).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 				"success": false,
@@ -79,7 +79,10 @@ func Login(c *fiber.Ctx) error {
 			"role":        user.Role,
 			"lastname":    user.Lastname,
 			"phonenumber": user.Phonenumber,
+			"orders":      user.Orders,
 			"address":     user.Addresses,
+			"favorite":    user.Favorites,
+			"carts":       user.Carts,
 		},
 	})
 

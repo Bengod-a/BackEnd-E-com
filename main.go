@@ -50,6 +50,7 @@ func main() {
 	app.Post("/address", middleware.UserCheck, controllers.CreateAddress)
 	app.Delete("/address/:id", middleware.UserCheck, controllers.DeleteAddress)
 	app.Patch("/edituser", middleware.UserCheck, controllers.Edituser)
+	app.Post("/addtocart", middleware.UserCheck, controllers.AddToCart)
 
 	app.Get("/GetBesSaleProduct", controllers.GetBesSaleProduct)
 	app.Get("/product/:id", controllers.GetProductById)
