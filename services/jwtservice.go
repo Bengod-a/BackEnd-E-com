@@ -33,8 +33,6 @@ func (service *jwtServices) GenerateToken(id int, email string, role string, coo
 		"iat":   time.Now().Unix(),
 	}
 
-	fmt.Println("claims-->", claims)
-
 	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(service.secretKey))
 	if err != nil {
 		return "", err

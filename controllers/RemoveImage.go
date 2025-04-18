@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -38,8 +37,6 @@ func HandleRemoveImage(c *fiber.Ctx) error {
 			"error": "Invalid request body",
 		})
 	}
-
-	fmt.Println(req)
 
 	if len(req.Urls) == 0 {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{

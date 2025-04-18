@@ -29,6 +29,8 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.27 // indirect
 	github.com/nedpals/supabase-go v0.5.0 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
+	github.com/stripe/stripe-go v70.15.0+incompatible // indirect
+	github.com/stripe/stripe-go/v82 v82.0.0 // indirect
 	github.com/supabase-community/functions-go v0.0.0-20220927045802-22373e6cb51d // indirect
 	github.com/supabase-community/gotrue-go v1.2.0 // indirect
 	github.com/supabase-community/postgrest-go v0.0.11 // indirect

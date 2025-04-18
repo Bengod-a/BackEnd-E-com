@@ -1,14 +1,24 @@
 package main
 
 import (
+	"log"
+	"os"
+
 	"github.com/Bengod-a/DB-GO/controllers"
 	"github.com/Bengod-a/DB-GO/db"
 	"github.com/Bengod-a/DB-GO/middleware"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/joho/godotenv"
+	"github.com/stripe/stripe-go"
 )
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+	stripe.Key = os.Getenv("STRIPE_SECRET_KEY")
 	app := fiber.New()
 	db.InitDB()
 
@@ -45,10 +55,14 @@ func main() {
 	app.Get("/user", middleware.AdminCheck, controllers.Getuser)
 	// Admin
 
+	// PayMent
+	app.Post("/create-checkout-session", controllers.CreatePaymentIntent)
+
 	app.Post("/register", controllers.Register)
 	app.Post("/login", controllers.Login)
 	app.Post("/address", middleware.UserCheck, controllers.CreateAddress)
 	app.Delete("/address/:id", middleware.UserCheck, controllers.DeleteAddress)
+	app.Delete("/productoncart/:id", middleware.UserCheck, controllers.DeleteproductOnCart)
 	app.Patch("/edituser", middleware.UserCheck, controllers.Edituser)
 	app.Post("/addtocart", middleware.UserCheck, controllers.AddToCart)
 

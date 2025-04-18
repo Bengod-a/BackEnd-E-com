@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"strconv"
 
 	"github.com/Bengod-a/DB-GO/db"
@@ -11,7 +10,6 @@ import (
 
 func ChangProduct(c *fiber.Ctx) error {
 	var req ReqProduct
-	fmt.Println(req)
 
 	id := c.Params("id")
 	productID, err := strconv.Atoi(id)

@@ -38,7 +38,7 @@ func UserCheck(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false,
-			"message": "Invalid token",
+			"message": "กรุณาล็อกอิน",
 		})
 	}
 

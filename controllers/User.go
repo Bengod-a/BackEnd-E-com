@@ -99,6 +99,7 @@ type ReqAddToCart struct {
 	Productid int `json:"Productid"`
 	Price     int `json:"price"`
 	Quantity  int `json:"quantity"`
+	Count     int `json:"count"`
 	Id        int `json:"id"`
 }
 
@@ -117,9 +118,24 @@ func AddToCart(c *fiber.Ctx) error {
 			"message": "ข้อมูลไม่ครบ",
 		})
 	}
+	var product models.Product
+	if err := db.DB.Where("id = ?", req.Productid).First(&product).Error; err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "ไม่พบสินค้า",
+		})
+	}
+
+	allcount := float64(req.Quantity) + float64(req.Count)
+
+	if int(allcount) > product.Quantity {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "สินค้าไม่พอ",
+		})
+	}
 
 	var cart models.Cart
-
 	err := db.DB.Where("order_by_id = ?", req.Id).First(&cart).Error
 	if err != nil {
 		cart = models.Cart{
@@ -170,11 +186,42 @@ func AddToCart(c *fiber.Ctx) error {
 			})
 		}
 	}
+	db.DB.
+		Preload("Cart").
+		Preload("Product").
+		Preload("Product.Images").
+		Preload("Product.Categories1").
+		Preload("Product.Categories2").
+		First(&productOnCart, productOnCart.ID)
 
 	return c.JSON(fiber.Map{
 		"success": true,
 		"message": "เพิ่มสินค้าในตะกร้าสำเร็จ",
 		"cart":    cart,
 		"product": productOnCart,
+	})
+}
+
+func DeleteproductOnCart(c *fiber.Ctx) error {
+	id := c.Params("id")
+
+	var productoncart models.ProductOnCart
+	if err := db.DB.Where("id = ?", id).First(&productoncart).Error; err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "ไม่พบตระกร้า",
+		})
+	}
+
+	if err := db.DB.Unscoped().Delete(&productoncart).Error; err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "Delete ProductOnCart Error",
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"success": true,
+		"message": "ลบสินค้าจากตะกร้าเรียบร้อยแล้ว",
 	})
 }
