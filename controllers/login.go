@@ -36,7 +36,9 @@ func Login(c *fiber.Ctx) error {
 	var user models.User
 	if err := db.DB.
 		Preload("Addresses").
+		Preload("Orders").
 		Preload("Carts.Products").
+		Preload("Favorites").
 		Preload("Carts.Products.Product.Images").
 		Where("email = ?", req.Email).First(&user).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -72,6 +74,16 @@ func Login(c *fiber.Ctx) error {
 		Expires: time.Now().Add(time.Hour * 6),
 	})
 
+	favoriteData := []map[string]interface{}{}
+	if user.Favorites != nil {
+		for _, fav := range user.Favorites {
+			favoriteData = append(favoriteData, map[string]interface{}{
+				"favoriteID": fav.ID,
+				"product_id": fav.ProductID,
+			})
+		}
+	}
+
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "ล็อกอินสำเร็จ",
@@ -85,7 +97,7 @@ func Login(c *fiber.Ctx) error {
 			"phonenumber": user.Phonenumber,
 			"orders":      user.Orders,
 			"address":     user.Addresses,
-			"favorite":    user.Favorites,
+			"favorite":    favoriteData,
 			"carts":       user.Carts,
 			"productOnCart": func() any {
 				if len(user.Carts) > 0 {

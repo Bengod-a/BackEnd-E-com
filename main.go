@@ -10,7 +10,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/joho/godotenv"
-	"github.com/stripe/stripe-go"
+	"github.com/stripe/stripe-go/v82"
 )
 
 func main() {
@@ -18,7 +18,9 @@ func main() {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
-	stripe.Key = os.Getenv("STRIPE_SECRET_KEY")
+	stripeKey := os.Getenv("STRIPE_SECRET_KEY")
+	stripe.Key = stripeKey
+
 	app := fiber.New()
 	db.InitDB()
 
@@ -56,15 +58,21 @@ func main() {
 	// Admin
 
 	// PayMent
-	app.Post("/create-checkout-session", controllers.CreatePaymentIntent)
+	app.Post("/create-payment-intent", middleware.UserCheck, controllers.CreatePaymentIntent)
+	app.Post("/saveorders", middleware.UserCheck, controllers.SaveOrders)
+	app.Post("/paymenttruemoney", controllers.PayMentTruemoney)
 
 	app.Post("/register", controllers.Register)
 	app.Post("/login", controllers.Login)
 	app.Post("/address", middleware.UserCheck, controllers.CreateAddress)
 	app.Delete("/address/:id", middleware.UserCheck, controllers.DeleteAddress)
-	app.Delete("/productoncart/:id", middleware.UserCheck, controllers.DeleteproductOnCart)
 	app.Patch("/edituser", middleware.UserCheck, controllers.Edituser)
+	app.Delete("/productoncart/:id", middleware.UserCheck, controllers.DeleteproductOnCart)
 	app.Post("/addtocart", middleware.UserCheck, controllers.AddToCart)
+
+	app.Post("/addtofavorite", middleware.UserCheck, controllers.AddToFavorite)
+	app.Get("/favorite", controllers.GetFavorite)
+	app.Delete("/deletefavorite", middleware.UserCheck, controllers.DeleteFavorite)
 
 	app.Get("/GetBesSaleProduct", controllers.GetBesSaleProduct)
 	app.Get("/product/:id", controllers.GetProductById)

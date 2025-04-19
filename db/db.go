@@ -70,12 +70,12 @@ func InitDB() *gorm.DB {
 	// )
 
 	// if err := DB.AutoMigrate(
+	// 	&models.Order{},
 	// 	&models.Product{},
 	// 	&models.User{},
 	// 	&models.Images{},
 	// 	&models.Category1{},
 	// 	&models.Category2{},
-	// 	&models.Order{},
 	// 	&models.Address{},
 	// 	&models.Cart{},
 	// 	&models.ProductOnCart{},
@@ -85,6 +85,7 @@ func InitDB() *gorm.DB {
 	// 	panic("Failed to migrate tables: " + err.Error())
 	// }
 
+	// DB.AutoMigrate(&models.Order{})
 	fmt.Println("Successfully connected DB")
 	return DB
 }

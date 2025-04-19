@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/Bengod-a/DB-GO/db"
@@ -224,4 +225,273 @@ func DeleteproductOnCart(c *fiber.Ctx) error {
 		"success": true,
 		"message": "ลบสินค้าจากตะกร้าเรียบร้อยแล้ว",
 	})
+}
+
+type ReqAddToFavorite struct {
+	Productid int `json:"productid"`
+	Id        int `json:"id"`
+}
+
+func AddToFavorite(c *fiber.Ctx) error {
+	var req ReqAddToFavorite
+
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "ไม่สามารถอ่านข้อมูลได้",
+		})
+	}
+
+	if int(req.Productid) == 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "ข้อมูลไม่ครบ",
+		})
+	}
+
+	var product models.Product
+	if err := db.DB.Where("id = ?", req.Productid).First(&product).Error; err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "ไม่พบ Product",
+		})
+	}
+
+	favorite := models.Favorite{
+		UserID:    uint(req.Id),
+		ProductID: uint(req.Productid),
+	}
+	if err := db.DB.Create(&favorite).Error; err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "Error Create Favorite",
+		})
+	}
+
+	if err := db.DB.
+		Where("user_id = ? AND product_id = ?", req.Id, req.Productid).
+		First(&favorite).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "ไม่สามารถดึงข้อมูล favorite พร้อม product ได้",
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"success": true,
+		"message": "เพิ่มในรายการโปรดแล้ว",
+		"data":    favorite,
+	})
+
+}
+
+func DeleteFavorite(c *fiber.Ctx) error {
+	var req ReqAddToFavorite
+
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "ไม่สามารถอ่านข้อมูลได้",
+		})
+	}
+
+	if int(req.Productid) == 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "ข้อมูลไม่ครบ",
+		})
+	}
+
+	var product models.Product
+	if err := db.DB.Where("id = ?", req.Productid).First(&product).Error; err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "ไม่พบ Product",
+		})
+	}
+
+	var favorite models.Favorite
+	if err := db.DB.Where("product_id = ? AND user_id = ?", req.Productid, req.Id).First(&favorite).Error; err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "ไม่พบ รายการโปรด",
+		})
+	}
+
+	if err := db.DB.Unscoped().Delete(&favorite).Error; err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "ไม่สามารถลบรายการโปรดได้",
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"success": true,
+		"message": "!ลบรายการโปรดแล้ว",
+		"data":    favorite,
+	})
+
+}
+
+func GetFavorite(c *fiber.Ctx) error {
+	favoriteID := c.Query("favoriteid")
+	userID := c.Query("id")
+
+	favoriteIDStrings := strings.Split(favoriteID, ",")
+
+	var favorite []models.Favorite
+	if err := db.DB.
+		Preload("Product").
+		Preload("Product.Images").
+		Where("id IN (?) AND user_id = ?", favoriteIDStrings, userID).
+		Find(&favorite).Error; err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"success": true,
+		"data":    favorite,
+	})
+
+}
+
+type StripePaymentIntent struct {
+	StripeId        string `json:"stripeId"`
+	LinkTruemoney   string `json:"linkTruemoney"`
+	Currency        string `json:"currency"`
+	OptionsPayMent  string `json:"optionspayment"`
+	Id              int    `json:"id"`
+	Count           []int  `json:"count"`
+	ProductOnCartID []int  `json:"productoncartid"`
+	Productid       []int  `json:"productid"`
+	Addressid       int    `json:"addressid"`
+	Amount          int64  `json:"amount"`
+	Status          string `json:"status"`
+}
+
+func SaveOrders(c *fiber.Ctx) error {
+	var req StripePaymentIntent
+
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "ไม่สามารถอ่านข้อมูลได้",
+		})
+	}
+
+	fmt.Println(req.Count)
+
+	var user models.User
+	if err := db.DB.Where("id = ?", req.Id).First(&user).Error; err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "ไม่พบ User",
+		})
+	}
+
+	var products []models.Product
+	if err := db.DB.Where("id IN ?", req.Productid).Find(&products).Error; err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+		})
+	}
+
+	addressID := uint(req.Addressid)
+	Amount := int(req.Amount) / 100
+	order := models.Order{
+		PayMentID:      req.StripeId,
+		LinkTruemoney:  req.LinkTruemoney,
+		OptionsPayMent: req.OptionsPayMent,
+		Currency:       &req.Currency,
+		PayMentStatus:  req.Status,
+		AddressID:      &addressID,
+		Status:         "กำลังดำเนินการ",
+		Amount:         int(Amount),
+		OrderByID:      uint(req.Id),
+	}
+	if err := db.DB.Create(&order).Error; err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "Create Orders Error",
+		})
+	}
+
+	count := req.Count
+	productid := req.Productid
+	productoncartid := req.ProductOnCartID
+	if len(count) != len(productid) {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+		})
+	}
+
+	for i := 0; i < len(count); i++ {
+		productId := productid[i]
+		productCount := count[i]
+		productoncartid := productoncartid[i]
+
+		for _, item := range products {
+			if int(item.ID) == productId {
+				if item.Quantity < productCount {
+					return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+						"success": false,
+						"message": "สินค้าไม่พอ",
+					})
+				}
+
+				item.Quantity -= productCount
+				if err := db.DB.Save(&item).Error; err != nil {
+					return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+						"success": false,
+						"message": "ลด stock ไม่ได้",
+					})
+				}
+
+				productOnOrder := models.ProductOnOrder{
+					ProductID: uint(productid[i]),
+					OrderID:   order.ID,
+					Count:     productCount,
+				}
+				if err := db.DB.Create(&productOnOrder).Error; err != nil {
+					return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+						"success": false,
+						"message": "Error in CreateproductOnOrder" + err.Error(),
+					})
+				}
+
+				var productoncart models.ProductOnCart
+				if err := db.DB.First(&productoncart, "id = ?", productoncartid).Error; err != nil {
+					return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+						"success": false,
+						"error":   "Error Delete ProductOnCart",
+					})
+				}
+
+				if err := db.DB.Unscoped().Delete(&productoncart).Error; err != nil {
+					return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+						"success": false,
+						"message": "ลบ productOnCart ไม่ได้",
+					})
+				}
+
+				break
+			}
+		}
+	}
+
+	if err := db.DB.
+		Preload("OrderBy").
+		Preload("Address").
+		First(&order, order.ID).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+		})
+	}
+	return c.JSON(fiber.Map{
+		"success": true,
+		"data":    order,
+	})
+
 }

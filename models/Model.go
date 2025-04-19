@@ -65,15 +65,18 @@ type Category2 struct {
 
 type Order struct {
 	gorm.Model
-	CartTotal float64          `gorm:"not null" json:"cart_total"`
-	OrderByID uint             `gorm:"not null" json:"order_by_id"`
-	OrderBy   User             `gorm:"foreignKey:OrderByID" json:"order_by"`
-	Amount    int              `gorm:"not null" json:"amount"`
-	Status    string           `gorm:"not null" json:"status"`
-	Currency  *string          `json:"currency"`
-	AddressID *uint            `json:"address_id"`
-	Address   *Address         `gorm:"foreignKey:AddressID" json:"address"`
-	Products  []ProductOnOrder `gorm:"foreignKey:OrderID;constraint:OnDelete:CASCADE;" json:"products"`
+	PayMentID      string           `json:"paymentid"`
+	PayMentStatus  string           `json:"paymentstatus"`
+	LinkTruemoney  string           `json:"linktruemoney"`
+	OptionsPayMent string           `json:"optionspayment"`
+	OrderByID      uint             `gorm:"not null" json:"order_by_id"`
+	OrderBy        User             `gorm:"foreignKey:OrderByID" json:"order_by"`
+	Amount         int              `gorm:"not null" json:"amount"`
+	Status         string           `gorm:"not null" json:"status"`
+	Currency       *string          `json:"currency"`
+	AddressID      *uint            `json:"address_id"`
+	Address        *Address         `gorm:"foreignKey:AddressID" json:"address"`
+	Products       []ProductOnOrder `gorm:"foreignKey:OrderID;constraint:OnDelete:CASCADE;" json:"products"`
 }
 
 type Address struct {
